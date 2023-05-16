@@ -1,3 +1,5 @@
 rootProject.name = 'BranikUpdater'
 include 'BranikRestService'
+include 'BranikDatabaseUpdater'
+include 'BranikUpdaterCore'
 

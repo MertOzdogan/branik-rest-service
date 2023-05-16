@@ -13,13 +13,14 @@ repositories {
 
 dependencies {
     implementation project(':BranikUpdaterCore')
-    implementation 'org.springframework.boot:spring-boot-starter-data-rest'
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.apache.commons:commons-lang3:3.12.0'
-    implementation 'com.typesafe:config:1.4.1'
-    implementation 'org.jsoup:jsoup:1.15.3'
+    implementation 'com.mysql:mysql-connector-j:8.0.31'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
+    implementation 'com.typesafe:config:1.4.1'
+
 }
 
 test {

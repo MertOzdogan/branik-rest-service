@@ -20,7 +20,7 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     implementation 'com.typesafe:config:1.4.1'
-
+    implementation 'org.jsoup:jsoup:1.16.1'
 }
 
 test {

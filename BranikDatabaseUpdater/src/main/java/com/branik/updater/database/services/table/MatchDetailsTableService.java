@@ -9,6 +9,7 @@ import com.branik.updater.database.constants.ConfigKeys;
 import com.branik.updater.database.converter.RestToGoalConverter;
 import com.branik.updater.database.itemreader.WebReader;
 import com.branik.updater.database.model.db.*;
+import com.branik.updater.database.repository.GoalRepository;
 import com.branik.updater.database.repository.PlayerRepository;
 import com.branik.updater.database.repository.StandingsRepository;
 import com.branik.updater.database.services.repository.LeagueRepositoryService;
@@ -49,6 +50,7 @@ public class MatchDetailsTableService {
     private final TeamRepositoryService teamRepositoryService;
     private final LeagueRepositoryService leagueRepositoryService;
     private final PitchRepositoryService pitchRepositoryService;
+    private GoalRepository goalRepository;
     private final RestToGoalConverter restToGoalConverter;
 
     private final MatchRepositoryService matchRepositoryService;
@@ -67,6 +69,7 @@ public class MatchDetailsTableService {
                                     WebReader<List<StandingsRestModel>> standingsRestReader,
                                     WebReader<List<OldMatchRestModel>> oldMatchRestReader,
                                     StandingsRepository standingsRepository,
+                                    GoalRepository goalRepository,
                                     MatchRepositoryService matchRepositoryService,
                                     TeamRepositoryService teamRepositoryService,
                                     LeagueRepositoryService leagueRepositoryService,
@@ -84,6 +87,7 @@ public class MatchDetailsTableService {
         this.standingsRestReader = standingsRestReader;
         this.futureMatchReader = futureMatchReader;
         this.oldMatchRestReader = oldMatchRestReader;
+        this.goalRepository = goalRepository;
         this.restToGoalConverter = restToGoalConverter;
 
         this.standingsRepository = standingsRepository;
@@ -97,7 +101,7 @@ public class MatchDetailsTableService {
     @Transactional
     public void initialize() {
         List<StandingsRestModel> standingsRestModelList = standingsRestReader.read(createRestURL(config.getString("rest.standing-table.url"), null));
-        LeagueEntity currentLeagueEntity = leagueRepositoryService.getLeague(leagueYear, leagueSeason, leagueNumber, leagueGroup);
+        LeagueEntity currentLeagueEntity = leagueRepositoryService.getLeague(leagueYear, leagueNumber, leagueGroup, leagueSeason);
 
         for (StandingsRestModel standingsRestModel : standingsRestModelList) {
             String teamName = standingsRestModel.getTeam();
@@ -170,6 +174,7 @@ public class MatchDetailsTableService {
         }
     }
 
+    // TODO: HACK BELOW METHOD
     @Transactional
     public void update() {
         List<StandingEntity> standingTeams = this.standingsRepository.findByLeagueLeagueYearAndLeagueLeagueSeasonAndLeagueLeagueNumberAndLeagueLeagueGroup(leagueYear, leagueSeason, leagueNumber, leagueGroup);
@@ -186,44 +191,54 @@ public class MatchDetailsTableService {
                 MatchEntity matchEntity = matchRepositoryService.getAllMatchOfTeamsByLeague(homeTeam.getName(), awayTeam.getName(), leagueYear, leagueSeason, leagueNumber, leagueGroup);
                 //TODO :FIX this mess
                 if (matchEntity == null) {
+                    // BU amina kodumun hackini databasede bazi maclarin home/away team yanlis olmasindan dolayi yaptim.
+                    // Mesela, aslinda Home team Branikken, databasede bi bug yuzunden zamaninda away team olarak Branik gecmis,
+                    // Haliyle karisiklik cikariyordu. Onumuzdeki sezon cozulur veya, cozen bi small app yapmak lazim.
+                    // amk.
                     matchEntity = matchRepositoryService.getAllMatchOfTeamsByLeague(awayTeam.getName(), homeTeam.getName(), leagueYear, leagueSeason, leagueNumber, leagueGroup);
+                    awayTeam = teams.get("home");
+                    homeTeam = teams.get("away");
+                    awayTeamGoalList = awayTeam.getGoalRestModels();
+                    homeTeamGoalList = homeTeam.getGoalRestModels();
                 }
                 //TODO: End
 
                 String homeTeamMvp = homeTeam.getMvp();
                 if (homeTeamMvp != null) {
-                    PlayerEntity homeMvpPlayer = playerRepository.findPlayerEntityByName(nameConverter(homeTeamMvp));
+                    PlayerEntity homeMvpPlayer = playerRepository.findPlayerEntityByNameAndTeamEntityName(nameConverter(homeTeamMvp), homeTeam.getName());
                     matchEntity.setHomeTeamMVP(homeMvpPlayer);
                 }
                 String homeTeamCaptain = homeTeam.getCaptain();
                 if (homeTeamCaptain != null) {
-                    PlayerEntity homeCaptainPlayer = playerRepository.findPlayerEntityByName(nameConverter(homeTeamCaptain));
+                    PlayerEntity homeCaptainPlayer = playerRepository.findPlayerEntityByNameAndTeamEntityName(nameConverter(homeTeamCaptain), homeTeam.getName());
                     matchEntity.setHomeTeamCaptain(homeCaptainPlayer);
                 }
 
                 String awayTeamMvp = awayTeam.getMvp();
                 if (awayTeamMvp != null) {
-                    PlayerEntity awayMvpPlayer = playerRepository.findPlayerEntityByName(nameConverter(awayTeamMvp));
+                    PlayerEntity awayMvpPlayer = playerRepository.findPlayerEntityByNameAndTeamEntityName(nameConverter(awayTeamMvp), awayTeam.getName());
                     matchEntity.setAwayTeamMVP(awayMvpPlayer);
                 }
                 String awayTeamCaptain = awayTeam.getCaptain();
                 if (awayTeamCaptain != null) {
-                    PlayerEntity awayCaptainPlayer = playerRepository.findPlayerEntityByName(nameConverter(awayTeamCaptain));
+                    PlayerEntity awayCaptainPlayer = playerRepository.findPlayerEntityByNameAndTeamEntityName(nameConverter(awayTeamCaptain), awayTeam.getName());
                     matchEntity.setAwayTeamCaptain(awayCaptainPlayer);
                 }
                 List<GoalEntity> goalEntityList = new ArrayList<>();
 
                 if (homeTeamGoalList != null) {
-                    goalEntityList.addAll(homeTeamGoalList.stream().map(restToGoalConverter::convert).collect(Collectors.toList()));
+                    TeamEntity homeTeamEntity = matchEntity.getHomeTeam();
+                    goalEntityList.addAll(homeTeamGoalList.stream().map(restToGoalConverter::convert).peek(o -> o.setTeamEntity(homeTeamEntity)).collect(Collectors.toList()));
                 }
                 if (awayTeamGoalList != null) {
-                    goalEntityList.addAll(awayTeamGoalList.stream().map(restToGoalConverter::convert).collect(Collectors.toList()));
+                    TeamEntity awayTeamEntity = matchEntity.getAwayTeam();
+                    goalEntityList.addAll(awayTeamGoalList.stream().map(restToGoalConverter::convert).peek(o -> o.setTeamEntity(awayTeamEntity)).collect(Collectors.toList()));
                 }
 
-
-                if (matchEntity.getGoals() == null || matchEntity.getGoals().isEmpty()) {
-                    matchEntity.setGoals(goalEntityList);
-                }
+                List<GoalEntity> goalListByMatch = goalRepository.findByMatchId(matchEntity.getId());
+                goalRepository.deleteAll(goalListByMatch);
+                
+                matchEntity.setGoals(goalEntityList);
                 matchEntity.setHomeTeamScore(homeTeamGoalList != null ? homeTeamGoalList.size() : 0);
                 matchEntity.setAwayTeamScore(awayTeamGoalList != null ? awayTeamGoalList.size() : 0);
                 matchEntity.setComment(detailedMatchOfTeam.getRefComment());

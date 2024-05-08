@@ -20,10 +20,12 @@ public class RestToGoalConverter {
         this.playerRepository = playerRepository;
     }
 
-
     public GoalEntity convert(GoalRestModel goalModel) {
         GoalEntity goalEntity = new GoalEntity();
         PlayerEntity player = getPlayer(goalModel.getName());
+        if (player == null) {
+            goalEntity.setType("OG");
+        }
         String minute = goalModel.getMinute();
         goalEntity.setPlayerEntity(player);
         goalEntity.setMinute(minute);
@@ -31,6 +33,7 @@ public class RestToGoalConverter {
     }
 
     private PlayerEntity getPlayer(String name) {
+
         if (name != null || !name.isEmpty()) {
             ExampleMatcher exampleMatcher = ExampleMatcher.matching().withMatcher("name", ExampleMatcher.GenericPropertyMatchers.contains().ignoreCase());
             String[] nameSurname = name.split(" ");

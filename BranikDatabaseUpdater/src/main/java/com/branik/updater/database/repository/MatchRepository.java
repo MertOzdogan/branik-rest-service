@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 
 public interface MatchRepository extends JpaRepository<MatchEntity, Integer> {
@@ -18,7 +17,7 @@ public interface MatchRepository extends JpaRepository<MatchEntity, Integer> {
             "AND m.leagueEntity.leagueSeason = :leagueSeason " +
             "AND m.leagueEntity.leagueNumber = :leagueNumber " +
             "AND m.leagueEntity.leagueGroup = :leagueGroup")
-    MatchEntity getMatchEntityByHomeTeamNameOrAwayTeamNameAndLeagueEntityLeagueYearAndLeagueEntityLeagueSeasonAndLeagueEntityLeagueNumberAndLeagueEntityLeagueGroup(
+    MatchEntity getMatchEntity(
             @Param("homeTeamName") String homeTeamName,
             @Param("awayTeamName") String awayTeamName,
             @Param("leagueYear") String leagueYear,

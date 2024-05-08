@@ -6,5 +6,8 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface PitchRepository extends JpaRepository<PitchEntity, Integer> {
     @Query("SELECT e FROM pitch e WHERE e.pitch_abbr LIKE %?1%")
-    PitchEntity getByPitchAbbr(String abbr);
+    PitchEntity getByPitchAbbrLike(String abbr);
+
+    @Query("SELECT e FROM pitch e WHERE e.pitch_abbr = ?1")
+    PitchEntity getByPitch_abbr(String abbr);
 }

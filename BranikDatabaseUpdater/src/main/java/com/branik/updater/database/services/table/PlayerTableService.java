@@ -25,12 +25,11 @@ import static com.branik.updater.database.constants.ConfigKeys.*;
 @Slf4j
 public class PlayerTableService {
 
-    private StandingsRepositoryService standingsRepositoryService;
+    private final StandingsRepositoryService standingsRepositoryService;
     private final LeagueEntity currentLeague;
     private Config config;
-    private WebReader<List<StatsRestModel>> statsTableRestReader;
-    private PlayerRepositoryService playerRepositoryService;
-    private TeamRepositoryService teamRepositoryService;
+    private final WebReader<List<StatsRestModel>> statsTableRestReader;
+    private final PlayerRepositoryService playerRepositoryService;
 
     @Autowired
     public PlayerTableService(WebReader<List<StatsRestModel>> statsTableRestReader,
@@ -53,11 +52,11 @@ public class PlayerTableService {
             List<StatsRestModel> statsRestModelList = statsTableRestReader.read(createRestURL(team.getName()));
             for (StatsRestModel statsRestModel : statsRestModelList) {
                 String fullName = statsRestModel.getName();
-                PlayerEntity playerByNameSurname = playerRepositoryService.getPlayerByNameSurname(fullName);
+                PlayerEntity playerByNameSurname = playerRepositoryService.getPlayerByNameSurname(fullName, team);
                 if (playerByNameSurname == null) {
                     PlayerEntity newPlayerToSave = PlayerEntity.builder().name(fullName).teamEntity(team).build();
                     playerRepositoryService.save(newPlayerToSave);
-                    log.info("Player saved: {}", newPlayerToSave);
+                    log.info("Player saved: ID: {} Name: {} Team: {}", newPlayerToSave.getId(), newPlayerToSave.getName(), team.getName());
                 }
             }
         }

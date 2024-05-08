@@ -11,7 +11,6 @@ import javax.persistence.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode
-
 public class PlayerEntity extends BaseEntity {
     @EqualsAndHashCode.Include
     private String name;

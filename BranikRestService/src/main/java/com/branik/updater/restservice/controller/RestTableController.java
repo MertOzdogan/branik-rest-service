@@ -33,7 +33,7 @@ public class RestTableController {
 
     @GetMapping("/fetch")
     public String fetch(
-            @RequestParam(value = "id", defaultValue = "old_game_table") String name,
+            @RequestParam(value = "id", defaultValue = "old_games_table") String name,
             @RequestParam(value = "year", required = false) String year,
             @RequestParam(value = "season", required = false) String season,
             @RequestParam(value = "league", required = false) String league,

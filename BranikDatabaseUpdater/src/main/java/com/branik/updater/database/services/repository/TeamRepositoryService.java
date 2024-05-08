@@ -20,7 +20,9 @@ public class TeamRepositoryService {
 
     public TeamEntity getTeamByName(String name) {
         TeamEntity byName = teamRepository.findByName(name);
-        Hibernate.initialize(byName.getLeagueEntities());
+        if (byName != null) {
+            Hibernate.initialize(byName.getLeagueEntities());
+        }
         return byName;
 
     }

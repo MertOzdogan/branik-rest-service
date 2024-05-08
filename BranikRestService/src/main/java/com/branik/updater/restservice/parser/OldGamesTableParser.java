@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.LinkedList;
@@ -21,6 +23,7 @@ public class OldGamesTableParser implements TableParser {
     public static final int TEAMS_INDEX = 3;
     public static final int KOLO_INDEX = 4;
     public static final int SCORES_INDEX = 5;
+    private static final Logger log = LoggerFactory.getLogger(OldGamesTableParser.class);
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
@@ -29,8 +32,6 @@ public class OldGamesTableParser implements TableParser {
 
         Elements rowElements = table.select("tr");
 
-        List<String> headers = new LinkedList<>();
-        List<RowRestModel> rowRestModels = new LinkedList<>();
         ArrayNode arrayNode = objectMapper.createArrayNode();
         for (int rowNumber = 0; rowNumber < rowElements.size(); rowNumber++) {
             ObjectNode objectNode = objectMapper.createObjectNode();
@@ -47,6 +48,11 @@ public class OldGamesTableParser implements TableParser {
                 String awayTeam = teams.get(1).text();
                 String kolo = row.get(KOLO_INDEX).text().replace(".", "");
                 String[] scores = row.get(SCORES_INDEX).text().split(":");
+                if (scores.length != 2) {
+                    log.info("Score is not entered for {} - {}", homeTeam, awayTeam);
+                    continue;
+                }
+
                 String homeTeamScore = scores[0];
                 String awayTeamScore = scores[1];
 

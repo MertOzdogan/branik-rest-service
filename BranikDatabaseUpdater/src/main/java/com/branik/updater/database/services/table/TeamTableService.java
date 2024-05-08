@@ -8,25 +8,21 @@ import com.branik.updater.database.itemreader.WebReader;
 import com.branik.updater.database.model.db.LeagueEntity;
 import com.branik.updater.database.model.db.PlayerEntity;
 import com.branik.updater.database.model.db.TeamEntity;
-import com.branik.updater.database.repository.LeagueRepository;
 import com.branik.updater.database.services.repository.TeamRepositoryService;
 import com.branik.updater.database.util.CurrentLeagueUtil;
 import com.typesafe.config.Config;
-import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.branik.updater.database.constants.ConfigKeys.*;
 import static com.branik.updater.database.constants.ConfigKeys.LEAGUE_SEASON;
 
 @Service
-public class TeamsService {
+public class TeamTableService {
     private final WebReader<List<StatsRestModel>> statsTableRestReader;
     private final WebReader<List<StandingsRestModel>> standingTableRestReader;
     private final LeagueEntity currentLeagueEntity;
@@ -34,11 +30,11 @@ public class TeamsService {
     private final Config config;
 
     @Autowired
-    public TeamsService(WebReader<List<StatsRestModel>> statsTableRestReader,
-                        WebReader<List<StandingsRestModel>> standingTableRestReader,
-                        TeamRepositoryService teamRepositoryService,
-                        CurrentLeagueUtil currentLeagueUtil,
-                        Config config) {
+    public TeamTableService(WebReader<List<StatsRestModel>> statsTableRestReader,
+                            WebReader<List<StandingsRestModel>> standingTableRestReader,
+                            TeamRepositoryService teamRepositoryService,
+                            CurrentLeagueUtil currentLeagueUtil,
+                            Config config) {
         this.statsTableRestReader = statsTableRestReader;
         this.standingTableRestReader = standingTableRestReader;
         this.teamRepositoryService = teamRepositoryService;

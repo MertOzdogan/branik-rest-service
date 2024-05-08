@@ -15,4 +15,7 @@ public interface DatabaseManager {
 
     void initializeTeams();
 
+    void updateLeague();
+
+    void initializePitches();
 }

@@ -8,7 +8,7 @@ public class URLUtil {
         if (teamName == null) {
             return "";
         }
-        String teamUrl = StringUtils.stripAccents(teamName).replace(".", "-");
+        String teamUrl = StringUtils.stripAccents(teamName).replace(".", "-").replace(",","-");
         return teamUrl.endsWith("-") ? teamUrl.substring(0, teamUrl.length() - 1).replace(" ", "-") : teamUrl.replace(" ", "-");
     }
 

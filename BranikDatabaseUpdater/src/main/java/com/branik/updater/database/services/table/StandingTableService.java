@@ -1,10 +1,14 @@
 package com.branik.updater.database.services.table;
 
 import com.branik.updater.core.model.rest.StandingsRestModel;
+import com.branik.updater.core.util.URLUtil;
 import com.branik.updater.database.constants.ConfigKeys;
 import com.branik.updater.database.itemreader.WebReader;
+import com.branik.updater.database.model.db.LeagueEntity;
 import com.branik.updater.database.model.db.StandingEntity;
 import com.branik.updater.database.repository.StandingsRepository;
+import com.branik.updater.database.services.repository.LeagueRepositoryService;
+import com.branik.updater.database.services.repository.TeamRepositoryService;
 import com.typesafe.config.Config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,6 +23,8 @@ import static com.branik.updater.database.constants.ConfigKeys.LEAGUE_NUMBER;
 public class StandingTableService {
     private final WebReader<List<StandingsRestModel>> standingsTableRestReader;
     private final StandingsRepository standingsRepository;
+    private final LeagueEntity currentLeague;
+    private TeamRepositoryService teamRepositoryService;
     private final String restUrl;
     private final String leagueYear;
     private final String leagueSeason;
@@ -28,7 +34,9 @@ public class StandingTableService {
     @Autowired
     public StandingTableService(Config config,
                                 WebReader<List<StandingsRestModel>> standingsTableRestReader,
-                                StandingsRepository standingsRepository) {
+                                StandingsRepository standingsRepository,
+                                TeamRepositoryService teamRepositoryService,
+                                LeagueRepositoryService leagueRepositoryService) {
         this.leagueYear = config.getString(LEAGUE_YEAR);
         this.leagueSeason = config.getString(LEAGUE_SEASON);
         this.leagueGroup = config.getString(LEAGUE_GROUP);
@@ -37,6 +45,8 @@ public class StandingTableService {
         this.standingsTableRestReader = standingsTableRestReader;
         this.restUrl = this.createRestURL(config);
         this.standingsRepository = standingsRepository;
+        this.teamRepositoryService = teamRepositoryService;
+        this.currentLeague = leagueRepositoryService.getLeague(leagueYear, leagueNumber, leagueGroup, leagueSeason);
     }
 
     @Transactional
@@ -45,10 +55,16 @@ public class StandingTableService {
         for (StandingsRestModel standingsRestModel : standingTableTeamList) {
             StandingEntity standingEntity = standingsRepository.findByTeamNameAndLeagueLeagueYearAndLeagueLeagueSeasonAndLeagueLeagueNumberAndLeagueLeagueGroup(
                     standingsRestModel.getTeam(),
-                            leagueYear,
-                            leagueSeason,
-                            leagueNumber,
-                            leagueGroup);
+                    leagueYear,
+                    leagueSeason,
+                    leagueNumber,
+                    leagueGroup);
+            if (standingEntity == null) {
+                standingEntity = StandingEntity.builder()
+                        .team(teamRepositoryService.getTeamByName(standingsRestModel.getTeam()))
+                        .league(currentLeague)
+                        .build();
+            }
 
             standingEntity.setWins(Integer.parseInt(standingsRestModel.getWinCount()));
             standingEntity.setLosses(Integer.parseInt(standingsRestModel.getLossCount()));
@@ -67,6 +83,7 @@ public class StandingTableService {
         return urlTemplate.replace(config.getString(ConfigKeys.YEAR_PLACE_HOLDER_KEY), config.getString(LEAGUE_YEAR))
                 .replace(config.getString(ConfigKeys.LEAGUE_PLACE_HOLDER_KEY), config.getString(LEAGUE_NUMBER))
                 .replace(config.getString(ConfigKeys.DIVISION_PLACE_HOLDER_KEY), config.getString(LEAGUE_GROUP))
-                .replace(config.getString(ConfigKeys.SEASON_PLACE_HOLDER_KEY), config.getString(LEAGUE_SEASON));
+                .replace(config.getString(ConfigKeys.SEASON_PLACE_HOLDER_KEY), config.getString(LEAGUE_SEASON))
+                .replace(config.getString(TEAM_PLACE_HOLDER_KEY), URLUtil.getTeamNameInUrlVersion(config.getString("team.name")));
     }
 }

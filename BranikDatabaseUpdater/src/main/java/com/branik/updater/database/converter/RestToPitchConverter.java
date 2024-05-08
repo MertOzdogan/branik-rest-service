@@ -11,7 +11,6 @@ import java.util.regex.Pattern;
 public class RestToPitchConverter {
     private final Pattern addressPattern = Pattern.compile("^(.*?)Praha [0-9]");
 
-
     public PitchEntity convert(PitchRestModel pitchModel) {
         PitchEntity.PitchEntityBuilder pitchEntityBuilder = PitchEntity.builder();
         return pitchEntityBuilder.pitch_abbr(pitchModel.getAbbvr())

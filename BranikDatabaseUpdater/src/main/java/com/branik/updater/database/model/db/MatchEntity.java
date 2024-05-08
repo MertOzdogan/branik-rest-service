@@ -16,7 +16,6 @@ import java.util.Objects;
 @AllArgsConstructor
 @ToString
 public class MatchEntity extends BaseEntity {
-
     private LocalDateTime time;
 
     @ManyToOne
@@ -40,8 +39,8 @@ public class MatchEntity extends BaseEntity {
     @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<GoalEntity> goals;
 
-    private int homeTeamScore;
-    private int awayTeamScore;
+    private Integer homeTeamScore;
+    private Integer awayTeamScore;
 
     @ManyToOne
     @JoinColumn(name = "HOME_TEAM_MVP")
@@ -73,10 +72,6 @@ public class MatchEntity extends BaseEntity {
     public void setGoals(List<GoalEntity> goals) {
         this.goals = goals;
         goals.forEach(o -> o.setMatch(this));
-    }
-
-    public void addGoals(GoalEntity goalEntity) {
-        this.goals.add(goalEntity);
     }
 
     @Override

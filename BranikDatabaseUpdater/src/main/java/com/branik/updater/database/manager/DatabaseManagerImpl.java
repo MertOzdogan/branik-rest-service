@@ -1,9 +1,7 @@
 package com.branik.updater.database.manager;
 
-import com.branik.updater.database.services.table.MatchDetailsTableService;
-import com.branik.updater.database.services.table.PlayerTableService;
-import com.branik.updater.database.services.table.StandingTableService;
-import com.branik.updater.database.services.table.TeamsService;
+import com.branik.updater.database.services.repository.LeagueRepositoryService;
+import com.branik.updater.database.services.table.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,18 +10,23 @@ public class DatabaseManagerImpl implements DatabaseManager {
 
     private final StandingTableService standingsTableService;
     private final MatchDetailsTableService matchDetailsTableService;
-    private final TeamsService teamsService;
+    private final TeamTableService teamTableService;
     private final PlayerTableService playerTableService;
+    private final LeagueRepositoryService leagueRepositoryService;
+    private final PitchTableService pitchTableService;
 
     @Autowired
     public DatabaseManagerImpl(StandingTableService standingTableService,
                                MatchDetailsTableService matchDetailsTableService,
-                               TeamsService teamsService,
-                               PlayerTableService playerTableService) {
+                               TeamTableService teamTableService,
+                               PlayerTableService playerTableService,
+                               LeagueRepositoryService leagueRepositoryService, PitchTableService pitchTableService) {
         this.standingsTableService = standingTableService;
         this.matchDetailsTableService = matchDetailsTableService;
-        this.teamsService = teamsService;
+        this.teamTableService = teamTableService;
         this.playerTableService = playerTableService;
+        this.leagueRepositoryService = leagueRepositoryService;
+        this.pitchTableService = pitchTableService;
     }
 
     @Override
@@ -48,7 +51,7 @@ public class DatabaseManagerImpl implements DatabaseManager {
 
     @Override
     public void updateTeams() {
-        teamsService.update();
+        teamTableService.update();
     }
 
     @Override
@@ -58,6 +61,17 @@ public class DatabaseManagerImpl implements DatabaseManager {
 
     @Override
     public void initializeTeams() {
-        teamsService.buildLeagueTeams();
+        teamTableService.buildLeagueTeams();
+    }
+
+    @Override
+    public void updateLeague() {
+        leagueRepositoryService.initialize();
+    }
+
+    @Override
+    public void initializePitches() {
+        pitchTableService.initialize();
+
     }
 }

@@ -21,5 +21,4 @@ public class PitchEntity  {
     private String pitch_abbr;
     private String pitch_desc;
     private String pitch_address;
-
 }

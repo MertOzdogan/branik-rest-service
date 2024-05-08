@@ -38,7 +38,7 @@ public class DatabaseBeans {
 
     @Bean
     public WebReader<List<PitchRestModel>> pitchReader() {
-        String apiUrl = "http://localhost:8080/fetch?id=pitch-table";
+        String apiUrl = "http://localhost:8085/fetch?id=pitch-table";
         return new AlternativeTableItemReader<>(apiUrl, new RestTemplate(), PitchRestModel[].class);
     }
 

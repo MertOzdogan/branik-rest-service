@@ -3,6 +3,7 @@ package com.branik.updater.restservice.fetcher;
 import com.branik.updater.core.model.rest.LeagueQueryModel;
 import com.branik.updater.restservice.service.TableService;
 import com.typesafe.config.Config;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +12,7 @@ import java.io.IOException;
 import static com.branik.updater.restservice.constants.ConfigKeys.*;
 
 @Service
+@Slf4j
 public class FixturesTableFetcher implements TableFetcher {
     private final String tableHtmlElement;
     private final TableService tableService;
@@ -28,7 +30,11 @@ public class FixturesTableFetcher implements TableFetcher {
     @Override
     public String getData(LeagueQueryModel leagueQueryModel) {
         try {
-            return this.tableService.getTableData(createURL(leagueQueryModel), tableHtmlElement);
+            String url = createURL(leagueQueryModel);
+            log.info("Getting data for: {} ",url);
+            String tableData = this.tableService.getTableData(url, tableHtmlElement);
+            log.info("Data: {} ",tableData);
+            return tableData;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

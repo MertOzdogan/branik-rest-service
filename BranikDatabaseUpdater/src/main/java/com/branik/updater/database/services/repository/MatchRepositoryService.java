@@ -2,6 +2,7 @@ package com.branik.updater.database.services.repository;
 
 import com.branik.updater.database.model.db.MatchEntity;
 import com.branik.updater.database.repository.MatchRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -9,6 +10,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@Slf4j
 public class MatchRepositoryService {
     private final MatchRepository matchRepository;
 
@@ -24,7 +26,7 @@ public class MatchRepositoryService {
 
     public MatchEntity getAllMatchOfTeamsByLeague(String homeTeamName, String awayTeamName, String leagueYear, String leagueSeason, String leagueNumber, String leagueGroup) {
         return matchRepository.
-                getMatchEntityByHomeTeamNameOrAwayTeamNameAndLeagueEntityLeagueYearAndLeagueEntityLeagueSeasonAndLeagueEntityLeagueNumberAndLeagueEntityLeagueGroup(homeTeamName, awayTeamName, leagueYear, leagueSeason, leagueNumber, leagueGroup);
+                getMatchEntity(homeTeamName, awayTeamName, leagueYear, leagueSeason, leagueNumber, leagueGroup);
     }
 
     public MatchEntity getMatch(LocalDateTime time, String homeTeam, String awayTeam) {

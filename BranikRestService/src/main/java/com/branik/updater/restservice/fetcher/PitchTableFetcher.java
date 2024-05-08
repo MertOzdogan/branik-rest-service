@@ -19,8 +19,8 @@ public class PitchTableFetcher implements TableFetcher {
     private final TableService genericTableService;
 
     @Autowired
-    public PitchTableFetcher(Config config, TableService genericTableService) {
-        this.genericTableService = genericTableService;
+    public PitchTableFetcher(Config config, TableService pitchTableService) {
+        this.genericTableService = pitchTableService;
         this.url = config.getString(PITCH_TABLE_URL);
         this.tableHtmlElement = config.getString(PITCH_TABLE_HTML_ELEMENT);
     }
